@@ -1,0 +1,60 @@
+{% extends 'easysearch/base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="section no-pad-bot" id="index-banner">
+  <div class="container">
+    <div class="row center">
+      <br><br><br><br><br><br><br><br>
+      <form class="col s12" method="POST" action="/search/results/">{% csrf_token %}
+        <div class="row">
+          <div class="col s12 valign-wrapper">
+            <div class="input-field inline col s5 offset-s3">
+              <input id="content" type="text" class="validate" name="query">
+              <label for="content">Type your query here</label>
+            </div>
+            <button id="search-button" type="submit" class="btn waves-effect waves-light blue">Search</button>
+          </div>
+        </div>
+        <a href="#" id="filter-button" class="btn waves-effect waves-light orange">Filter</a>
+        <div id="filter">
+          <div class="col s12">
+            <b>From Date*</b>:
+            <div class="input-field inline">
+              <input type="date" class="datepicker" name="fromdate">
+            </div>
+          </div>
+          <div class="col s12">
+            <b>To Date*</b>:
+            <div class="input-field inline">
+              <input type="date" class="datepicker" name="todate">
+            </div>
+          </div>
+          <div class="input-field col s10 offset-s1 m4 offset-m4">
+            <select multiple name="department">
+              <option value="" disabled selected>Department</option>
+              <option value="carloan">Car Loan</option>
+              <option value="homeloan">Home Loan</option>
+            </select>
+          </div>
+          <div class="input-field col s10 offset-s1 m4 offset-m4">
+            <select multiple name="segment">
+              <option value="" disabled selected>Segment</option>
+              <option value="carloan">Car Loan</option>
+              <option value="homeloan">Home Loan</option>
+            </select>
+          </div>
+          <div class="input-field col s10 offset-s1 m4 offset-m4">
+            <select multiple name="category">
+              <option value="" disabled selected>Category</option>
+              <option value="carloan">Car Loan</option>
+              <option value="homeloan">Home Loan</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

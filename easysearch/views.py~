@@ -1,0 +1,235 @@
+import datetime
+
+from django.shortcuts import render, HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search
+
+from .config import *
+
+es = Elasticsearch(ES_SERVER)
+
+
+def get_epoch_seconds_from_date(dt):
+    return (dt - datetime.date(1970, 1, 1)).total_seconds()
+
+DEFAULT_FROM_DATE = get_epoch_seconds_from_date(
+    datetime.datetime.strptime("2000-01-01", "%Y-%m-%d").date())
+
+
+def Search(request):
+    return render(request, 'easysearch/home.html', {})
+
+
+def SearchResults(request):
+    result_list = process(
+        request.POST.get('department', ''),
+        request.POST.get('segment', ''),
+        request.POST.get('category', ''),
+        request.POST.get('fromdate', ''),
+        request.POST.get('todate', ''),
+        request.POST.get('query', ''),
+    )
+    paginator = Paginator(result_list, NUM_PAGINATOR_RESULTS)
+    try:
+        results = paginator.page(request.GET.get('page'))
+    except PageNotAnInteger:
+        results = paginator.page(1)
+    except EmptyPage:
+        results = paginator.page(paginator.num_pages)
+    return render(request, 'easysearch/results.html', {
+        'results': results,
+        'num_pages': range(1, paginator.num_pages + 1),
+    })
+
+
+def process(department, segment, category, date_from, date_to, search_query):
+    squery = Search(using=es, index="files").query(
+        "multi_match", query=search_query, fields=['title', 'information'])
+    if len(department) != 0:
+        squery = squery.filter("terms", department=department)
+    if len(segment) != 0:
+        squery = squery.filter("terms", segment=segment)
+    if len(category) != 0:
+        squery = squery.filter("terms", category=category)
+    squery = squery.filter("range", lastmodified={
+                           "lte": date_to, "gte": date_from})
+    response = squery.execute()
+    print("debug: ", response)
+    return response
+
+
+def process(
+        query,
+        fromdate,
+        todate=datetime.datetime.now(),
+        department=[],
+        segment=[],
+        category=[]):
+    if (len(fromdate) == 0):
+        fromdate = DEFAULT_FROM_DATE
+
+    if (len(todate) == 0):
+        todate = get_epoch_seconds_from_date(datetime.datetime.now().date())
+
+    print query
+    print fromdate
+    print todate
+    print department
+    print segment
+    print category
+
+    response = [
+        {
+            'title': 'Home Loan document',
+            'information': 'This is a pdf test document para 1 akjsdhas kdjhas kdjhaksj asjaskjsahdjahksjdhajk dha kjdhk dhkjd ',
+            'link': 'test1.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Home Loan',
+            'category': 'category1',
+
+        },
+        {
+            'title': 'Car Loan document1',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document2',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document3',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document4',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Home Loan document5',
+            'information': 'This is a pdf test document para 1 akjsdhas kdjhas kdjhaksj asjaskjsahdjahksjdhajk dha kjdhk dhkjd ',
+            'link': 'test1.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Home Loan',
+            'category': 'category1',
+
+        },
+        {
+            'title': 'Car Loan document6',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document7',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document8',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document9',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Home Loan document10',
+            'information': 'This is a pdf test document para 1 akjsdhas kdjhas kdjhaksj asjaskjsahdjahksjdhajk dha kjdhk dhkjd ',
+            'link': 'test1.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Home Loan',
+            'category': 'category1',
+
+        },
+        {
+            'title': 'Car Loan document11',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document12',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document13',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        },
+        {
+            'title': 'Car Loan document14',
+            'information': 'This is a pdf test document para 2',
+            'link': 'test2.pdf',
+            'lastmodified': '1499685159.0',
+            'segment': 'car loan',
+            'department': 'Car Loan',
+            'category': 'category2',
+
+        }
+    ]
+
+    return response
